@@ -1,0 +1,5 @@
+{
+  "name": "Graphics Generator",
+  "description": "An advanced text-to-graphics editor using Monaco, with live preview and PNG export capabilities.",
+  "requestFramePermissions": []
+}

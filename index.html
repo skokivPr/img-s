@@ -1,0 +1,504 @@
+
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <title>🎨 Generator Grafik - Advanced Monaco Editor</title>
+
+  <!-- HTML2Canvas dla eksportu PNG -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- Monaco Editor -->
+  <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.41.0/min/vs/loader.js"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="index.css">
+  <!-- Google Fonts - Monospace dla edytora -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono:wght@400&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Fira+Code:wght@300..700&family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&display=swap"
+    rel="stylesheet">
+
+
+</head>
+
+<body>
+  <!-- Theme Toggle -->
+  <button id="theme-toggle" title="Przełącz motyw">
+        <span id="sunIcon">☀️</span>
+        <span id="moonIcon" style="display: none;">🌙</span>
+    </button>
+
+  <div class="main-layout">
+    <!-- Graphics Editor Panel -->
+    <div class="panel">
+      <div class="panel-header">Advanced Editor</div>
+      <button id="exportGraphicsPng" onclick="exportGraphicsAsPng()">
+                <i class="fa-solid fa-download"></i>
+                Zapisz PNG
+            </button>
+      <div class="editor-area">
+        <div class="toolbar">
+          <!-- Nagłówki i struktury -->
+          <button title="Dodaj Tytuł Główny" data-action="insert" data-value="# Tytuł Główny "><i
+                            class="fa-solid fa-heading"></i></button>
+          <button title="Dodaj Podtytuł" data-action="insert" data-value="## Podtytuł "><i
+                            class="fa-solid fa-paragraph"></i></button>
+          <button title="Dodaj Sekcję" data-action="insert" data-value="### Sekcja "><i
+                            class="fa-solid fa-section" style="color: #4f46e5;"></i></button>
+          <button title="Dodaj Info Box" data-action="insert" data-value="[INFO] "><i
+                            class="fa-solid fa-circle-info"></i></button>
+          <button title="Dodaj Cytat" data-action="wrap" data-value="> "><i class="fa-solid fa-quote-left"
+                            style="color: #6b7280;"></i></button>
+          <div class="separator"></div>
+
+          <!-- Formatowanie tekstu -->
+          <button title="Pogrubienie" data-action="wrap" data-value="**"><i
+                            class="fa-solid fa-bold"></i></button>
+          <button title="Kursywa" data-action="wrap" data-value="*"><i
+                            class="fa-solid fa-italic"></i></button>
+          <button title="Podkreślenie" data-action="wrap" data-value="<u>"><i
+                            class="fa-solid fa-underline"></i></button>
+          <button title="Przekreślenie" data-action="wrap" data-value="~~"><i
+                            class="fa-solid fa-strikethrough"></i></button>
+          <button title="Kod inline" data-action="wrap" data-value="`"><i class="fa-solid fa-code"
+                            style="color: #7c3aed;"></i></button>
+          <div class="separator"></div>
+
+          <!-- Zmiana wielkości liter -->
+          <button title="Wielkie litery" data-action="case" data-case="upper"><i
+                            class="fa-solid fa-arrow-up-a-z"></i></button>
+          <button title="Małe litery" data-action="case" data-case="lower"><i
+                            class="fa-solid fa-arrow-down-a-z"></i></button>
+          <button title="Kapitalizacja" data-action="case" data-case="capitalize"><i
+                            class="fa-solid fa-text-height"></i></button>
+          <div class="separator"></div>
+
+          <!-- Listy i układy -->
+          <button title="Lista punktowa" data-action="insert" data-value="- "><i
+                            class="fa-solid fa-list-ul"></i></button>
+          <button title="Lista numerowana" data-action="insert" data-value="1. "><i
+                            class="fa-solid fa-list-ol"></i></button>
+          <div class="separator"></div>
+
+          <!-- Elementy specjalne -->
+          <button title="Dodaj tabelę" data-action="insert-table"><i class="fa-solid fa-table"
+                            style="color: #059669;"></i></button>
+          <button title="Dodaj link" data-action="insert-link"><i class="fa-solid fa-link"
+                            style="color: #2563eb;"></i></button>
+          <button title="Ikony i emotki" data-action="show-icons"><i class="fa-solid fa-icons"
+                            style="color: #fbbf24;"></i></button>
+          <button title="Dodaj obrazek" data-action="show-image"><i class="fa-solid fa-image"
+                            style="color: #7c3aed;"></i></button>
+          <div class="separator"></div>
+
+          <!-- Ikony biznesowe -->
+          <button title="Sukces/Zakończenie" data-action="insert" data-value="✅ "><i
+                            class="fa-solid fa-check-circle" style="color: #10b981;"></i></button>
+          <button title="Problem/Błąd" data-action="insert" data-value="❌ "><i
+                            class="fa-solid fa-times-circle" style="color: #ef4444;"></i></button>
+          <button title="W trakcie" data-action="insert" data-value="⏳ "><i class="fa-solid fa-hourglass-half"
+                            style="color: #f59e0b;"></i></button>
+          <button title="Priorytet" data-action="insert" data-value="🔥 "><i class="fa-solid fa-fire"
+                            style="color: #dc2626;"></i></button>
+          <div class="separator"></div>
+
+          <!-- Kroki -->
+          <button title="Dodaj Krok 1" data-action="insert" data-value="[#1] Tytuł | Opis... "><i
+                            class="fa-solid fa-1" style="color: #0d47a1; "></i></button>
+          <button title="Dodaj Krok 2" data-action="insert" data-value="[#2] Tytuł | Opis... "><i
+                            class="fa-solid fa-2" style="color: #43a10d; "></i></button>
+          <button title="Dodaj Krok 3" data-action="insert" data-value="[#3] Tytuł | Opis... "><i
+                            class="fa-solid fa-3" style="color: #ffa600; "></i></button>
+          <button title="Dodaj Krok 4" data-action="insert" data-value="[#4] Tytuł | Opis... "><i
+                            class="fa-solid fa-4" style="color: #ff0000; "></i></button>
+          <div class="separator"></div>
+          <!-- Linia pozioma -->
+          <button title="Dodaj linię poziomą" data-action="insert" data-value="---"><i
+                            class="fa-solid fa-minus" style="color: #6b7280; "></i></button>
+          <div class="separator"></div>
+
+          <!-- Akcje -->
+          <button title="Cofnij (Ctrl+Z)" data-action="undo"><i class="fa-solid fa-undo"
+                            style="color: #6b7280;"></i></button>
+          <button title="Ponów (Ctrl+Y)" data-action="redo"><i class="fa-solid fa-redo"
+                            style="color: #6b7280;"></i></button>
+          <button title="Wyczyść edytor" data-action="clear"><i class="fa-solid fa-trash"
+                            style="color: #dc2626; "></i></button>
+          <div class="separator"></div>
+          <button title="Przekształć tekst na format" data-action="format-text"><i
+                            class="fa-solid fa-magic-wand-sparkles" style="color: #ed993a; "></i></button>
+        </div>
+        <div id="editor-container" style="position: relative;">
+          <div id="word-counter" class="word-counter">Słów: 0 | Znaków: 0</div>
+        </div>
+        <!-- Format Legend -->
+        <div id="format-legend-container"></div>
+      </div>
+    </div>
+
+    <!-- Live Preview Panel -->
+    <div class="panel">
+      <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <span>Live Preview</span>
+
+      </div>
+      <div id="preview" class="preview-area">
+        <!-- Preview będzie tutaj generowany -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div id="confirmModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-body">
+        <div class="modal-icon">
+          <i class="fa-solid fa-triangle-exclamation" style="color: #dc2626;"></i>
+        </div>
+        <h2 class="modal-title" style="justify-content: center;">Potwierdź akcję</h2>
+        <p class="modal-message">
+          Czy na pewno chcesz wyczyścić cały edytor?<br>Ta akcja jest nieodwracalna.
+        </p>
+      </div>
+      <div class="modal-buttons">
+        <button class="modal-button secondary" onclick="hideConfirmModal()">Anuluj</button>
+        <button class="modal-button primary" onclick="confirmAction()">Wyczyść</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Icons Modal -->
+  <div id="iconsModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 600px;">
+      <div class="modal-header">
+        <h2 class="modal-title">
+          <i class="fa-solid fa-icons" style="color: #fbbf24;"></i>
+          Ikony i Emotki
+        </h2>
+        <button class="modal-button-close" onclick="hideIconsModal()" title="Zamknij">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-message" style="margin-top: 0;">Wybierz ikonę lub emotkę do wstawienia:</p>
+        <div class="icons-container">
+          <!-- Font Awesome Icons -->
+          <div class="icons-category">
+            <h4 class="category-title">📊 Biznes & Praca</h4>
+            <div class="icons-grid">
+              <button class="icon-btn" data-icon="<i class=&quot;fa-solid fa-briefcase&quot;&gt;&lt;/i&gt;"
+                title="Teczka"><i class="fa-solid fa-briefcase"></i></button>
+              <button class="icon-btn" data-icon="<i class=&quot;fa-solid fa-chart-line&quot;&gt;&lt;/i&gt;"
+                title="Wykres"><i class="fa-solid fa-chart-line"></i></button>
+              <button class="icon-btn" data-icon="<i class=&quot;fa-solid fa-target&quot;&gt;&lt;/i&gt;" title="Cel"><i
+                  class="fa-solid fa-target"></i></button>
+              <button class="icon-btn" data-icon="<i class=&quot;fa-solid fa-lightbulb&quot;&gt;&lt;/i&gt;"
+                title="Pomysł"><i class="fa-solid fa-lightbulb"></i></button>
+              <button class="icon-btn" data-icon="<i class=&quot;fa-solid fa-trophy&quot;&gt;&lt;/i&gt;"
+                title="Trofeum"><i class="fa-solid fa-trophy"></i></button>
+              <button class="icon-btn" data-icon="<i class=&quot;fa-solid fa-users&quot;&gt;&lt;/i&gt;" title="Zespół"><i
+                  class="fa-solid fa-users"></i></button>
+              <button class="icon-btn" data-icon="<i class=&quot;fa-solid fa-clock&quot;&gt;&lt;/i&gt;" title="Czas"><i
+                  class="fa-solid fa-clock"></i></button>
+              <button class="icon-btn" data-icon="<i class=&quot;fa-solid fa-dollar-sign&quot;&gt;&lt;/i&gt;"
+                title="Pieniądze"><i class="fa-solid fa-dollar-sign"></i></button>
+            </div>
+          </div>
+          <div class="icons-category">
+            <h4 class="category-title">💻 Technologia</h4>
+            <div class="icons-grid">
+              <button class="icon-btn" data-icon="<i class=&quot;fa-solid fa-laptop&quot;&gt;&lt;/i&gt;" title="Laptop"><i
+                  class="fa-solid fa-laptop"></i></button>
+              <button class="icon-btn" data-icon="<i class=&quot;fa-solid fa-mobile-screen&quot;&gt;&lt;/i&gt;"
+                title="Telefon"><i class="fa-solid fa-mobile-screen"></i></button>
+              <button class="icon-btn" data-icon="<i class=&quot;fa-solid fa-cloud&quot;&gt;&lt;/i&gt;" title="Chmura"><i
+                  class="fa-solid fa-cloud"></i></button>
+              <button class="icon-btn" data-icon="<i class=&quot;fa-solid fa-database&quot;&gt;&lt;/i&gt;"
+                title="Baza danych"><i class="fa-solid fa-database"></i></button>
+              <button class="icon-btn" data-icon="<i class=&quot;fa-solid fa-code&quot;&gt;&lt;/i&gt;" title="Kod"><i
+                  class="fa-solid fa-code"></i></button>
+              <button class="icon-btn" data-icon="<i class=&quot;fa-solid fa-rocket&quot;&gt;&lt;/i&gt;" title="Start"><i
+                  class="fa-solid fa-rocket"></i></button>
+              <button class="icon-btn" data-icon="<i class=&quot;fa-solid fa-wifi&quot;&gt;&lt;/i&gt;" title="WiFi"><i
+                  class="fa-solid fa-wifi"></i></button>
+              <button class="icon-btn" data-icon="<i class=&quot;fa-solid fa-bug&quot;&gt;&lt;/i&gt;" title="Bug"><i
+                  class="fa-solid fa-bug"></i></button>
+            </div>
+          </div>
+          <div class="icons-category">
+            <h4 class="category-title">📞 Komunikacja</h4>
+            <div class="icons-grid">
+              <button class="icon-btn" data-icon="<i class=&quot;fa-solid fa-envelope&quot;&gt;&lt;/i&gt;"
+                title="Email"><i class="fa-solid fa-envelope"></i></button>
+              <button class="icon-btn" data-icon="<i class=&quot;fa-solid fa-phone&quot;&gt;&lt;/i&gt;" title="Telefon"><i
+                  class="fa-solid fa-phone"></i></button>
+              <button class="icon-btn" data-icon="<i class=&quot;fa-solid fa-comment&quot;&gt;&lt;/i&gt;"
+                title="Komentarz"><i class="fa-solid fa-comment"></i></button>
+              <button class="icon-btn" data-icon="<i class=&quot;fa-solid fa-bell&quot;&gt;&lt;/i&gt;"
+                title="Powiadomienie"><i class="fa-solid fa-bell"></i></button>
+              <button class="icon-btn" data-icon="<i class=&quot;fa-solid fa-share&quot;&gt;&lt;/i&gt;"
+                title="Udostępnij"><i class="fa-solid fa-share"></i></button>
+              <button class="icon-btn" data-icon="<i class=&quot;fa-solid fa-microphone&quot;&gt;&lt;/i&gt;"
+                title="Mikrofon"><i class="fa-solid fa-microphone"></i></button>
+              <button class="icon-btn" data-icon="<i class=&quot;fa-solid fa-video&quot;&gt;&lt;/i&gt;" title="Wideo"><i
+                  class="fa-solid fa-video"></i></button>
+              <button class="icon-btn" data-icon="<i class=&quot;fa-solid fa-paper-plane&quot;&gt;&lt;/i&gt;"
+                title="Wyślij"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+          </div>
+          <div class="icons-category">
+            <h4 class="category-title">😊 Emotki Unicode</h4>
+            <div class="icons-grid">
+              <button class="icon-btn" data-icon="😀" title="Uśmiech">😀</button>
+              <button class="icon-btn" data-icon="😊" title="Radość">😊</button>
+              <button class="icon-btn" data-icon="😂" title="Śmiech">😂</button>
+              <button class="icon-btn" data-icon="🤔" title="Myślenie">🤔</button>
+              <button class="icon-btn" data-icon="😎" title="Cool">😎</button>
+              <button class="icon-btn" data-icon="👍" title="Kciuk w górę">👍</button>
+              <button class="icon-btn" data-icon="👎" title="Kciuk w dół">👎</button>
+              <button class="icon-btn" data-icon="❤️" title="Serce">❤️</button>
+              <button class="icon-btn" data-icon="⭐" title="Gwiazda">⭐</button>
+              <button class="icon-btn" data-icon="🎉" title="Świętowanie">🎉</button>
+            </div>
+          </div>
+          <div class="icons-category">
+            <h4 class="category-title">⬆️ Strzałki & Symbole</h4>
+            <div class="icons-grid">
+              <button class="icon-btn" data-icon="→" title="Strzałka prawo">→</button>
+              <button class="icon-btn" data-icon="←" title="Strzałka lewo">←</button>
+              <button class="icon-btn" data-icon="↑" title="Strzałka góra">↑</button>
+              <button class="icon-btn" data-icon="↓" title="Strzałka dół">↓</button>
+              <button class="icon-btn" data-icon="⇒" title="Podwójna strzałka">⇒</button>
+              <button class="icon-btn" data-icon="●" title="Koło">●</button>
+              <button class="icon-btn" data-icon="■" title="Kwadrat">■</button>
+              <button class="icon-btn" data-icon="▲" title="Trójkąt">▲</button>
+              <button class="icon-btn" data-icon="★" title="Gwiazda">★</button>
+              <button class="icon-btn" data-icon="+" title="Plus">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-buttons">
+        <button class="modal-button secondary" onclick="hideIconsModal()">Zamknij</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Image Modal -->
+  <div id="imageModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 500px;">
+      <div class="modal-header">
+        <h2 class="modal-title">
+          <i class="fa-solid fa-image" style="color: #7c3aed;"></i>
+          Dodaj obraz
+        </h2>
+        <button class="modal-button-close" onclick="hideImageModal()" title="Zamknij">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="format-input-section">
+          <div class="format-label-row">
+            <label for="imageUrl" class="format-label">
+              <i class="fa-solid fa-link"></i> URL obrazu:
+            </label>
+            <button class="paste-btn" onclick="pasteImageFromClipboard()" title="Wklej ze schowka">
+              <i class="fa-solid fa-paste"></i>
+            </button>
+          </div>
+          <input type="url" id="imageUrl" class="styled-input" placeholder="https://example.com/obraz.jpg" />
+
+          <label for="imageAlt" class="format-label" style="margin-top: 1rem; display: block;">
+            <i class="fa-solid fa-comment"></i> Opis obrazu (alt text):
+          </label>
+          <input type="text" id="imageAlt" class="styled-input" placeholder="Opisz co znajduje się na obrazie..." />
+        </div>
+        <div class="image-preview-section">
+          <div id="imagePreview" style="color: var(--text-muted);">
+            <i class="fa-solid fa-image" style="font-size: 2rem; opacity: 0.5;"></i>
+            <p style="margin: 0.5rem 0 0 0; font-size: 0.875rem;">Podgląd pojawi się tutaj</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-buttons">
+        <button class="modal-button secondary" onclick="clearImageForm()">
+          <i class="fa-solid fa-eraser"></i> Wyczyść
+        </button>
+        <button class="modal-button primary" onclick="insertImage()">
+          <i class="fa-solid fa-plus"></i> Dodaj obraz
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PNG Export Options Modal -->
+  <div id="pngExportModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 400px;">
+      <div class="modal-body">
+        <div class="modal-icon" style="color: #10b981;">
+          <i class="fa-solid fa-download"></i>
+        </div>
+        <h2 class="modal-title" style="justify-content: center;">Zapisz PNG</h2>
+        <p class="modal-message">Wybierz sposób zapisania obrazu:</p>
+        <div class="png-export-options">
+          <button class="png-export-option" onclick="handlePngExport('download')">
+            <i class="fa-solid fa-download" style="color: #10b981; font-size: 1.5rem;"></i>
+            <div style="text-align: left;">
+              <div style="font-weight: 700; color: var(--text-color);">Pobierz plik</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">Zapisz PNG na dysku</div>
+            </div>
+          </button>
+          <button class="png-export-option" onclick="handlePngExport('newtab')">
+            <i class="fa-solid fa-external-link-alt" style="color: #3b82f6; font-size: 1.5rem;"></i>
+            <div style="text-align: left;">
+              <div style="font-weight: 700; color: var(--text-color);">Otwórz w nowej zakładce</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">Podgląd w przeglądarce</div>
+            </div>
+          </button>
+        </div>
+      </div>
+      <div class="modal-buttons">
+        <button class="modal-button secondary" onclick="hidePngExportModal()">Anuluj</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Table Generator Modal -->
+  <div id="tableModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 600px;">
+      <div class="modal-header">
+        <h2 class="modal-title">
+          <i class="fa-solid fa-table" style="color: #059669;"></i>
+          Generator tabel
+        </h2>
+        <button class="modal-button-close" onclick="hideTableModal()" title="Zamknij">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; border-bottom: 1px solid var(--border-color);">
+          <button id="tabBasic" class="table-tab active" onclick="switchTableTab('basic')">
+            <i class="fa-solid fa-table"></i> Podstawowa
+          </button>
+          <button id="tabFromText" class="table-tab" onclick="switchTableTab('fromtext')">
+            <i class="fa-solid fa-file-text"></i> Z tekstu
+          </button>
+        </div>
+        <div id="basicTableOptions" class="table-option-panel">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+            <div>
+              <label class="format-label">Kolumny:</label>
+              <input type="number" id="tableColumns" value="3" min="1" max="10" class="styled-input">
+            </div>
+            <div>
+              <label class="format-label">Wiersze:</label>
+              <input type="number" id="tableRows" value="3" min="1" max="20" class="styled-input">
+            </div>
+          </div>
+          <label class="format-option" style="padding-left: 0;">
+            <input type="checkbox" id="tableHeader" checked>
+            <span>Dodaj nagłówek</span>
+          </label>
+        </div>
+        <div id="textTableOptions" class="table-option-panel" style="display: none;">
+          <p class="modal-message" style="text-align: left; margin-top: 0; padding: 0 0 0.5rem 0;">Wklej tekst do
+            przekształcenia:</p>
+          <textarea id="textToTable" class="styled-input" style="height: 150px; resize: vertical;"
+            placeholder="Wklej tekst tutaj. Każdy wiersz zostanie przekształcony w wiersz tabeli.&#10;Przykład:&#10;Nazwa | Wiek | Miasto&#10;Jan | 25 | Warszawa&#10;Anna | 30 | Kraków"></textarea>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+            <div>
+              <label class="format-label">Separator:</label>
+              <select id="textSeparator" class="styled-input">
+                <option value="|">Pionowa kreska (|)</option>
+                <option value=",">Przecinek (,)</option>
+                <option value=";">Średnik (;)</option>
+                <option value="\t">Tab</option>
+                <option value=" ">Spacja</option>
+                <option value="auto">Automatycznie</option>
+              </select>
+            </div>
+            <div style="align-self: end;">
+              <label class="format-option">
+                <input type="checkbox" id="textTableHeader" checked>
+                <span>Pierwszy wiersz to nagłówek</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-buttons">
+        <button class="modal-button secondary" onclick="hideTableModal()">Anuluj</button>
+        <button class="modal-button primary" onclick="generateTable()">
+          <i class="fa-solid fa-plus"></i> Wstaw tabelę
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Format Text Modal -->
+  <div id="formatModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 600px;">
+      <div class="modal-header">
+        <h2 class="modal-title">
+          <i class="fa-solid fa-magic-wand-sparkles" style="color: #ed993a;"></i>
+          Inteligentne formatowanie
+        </h2>
+        <button class="modal-button-close" onclick="hideFormatModal()" title="Zamknij">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="format-input-section" style="margin-top: 0;">
+          <div class="format-label-row">
+            <label for="formatTextArea" class="format-label">
+              <i class="fa-solid fa-clipboard"></i> Tekst do przekształcenia:
+            </label>
+            <button class="paste-btn" onclick="pasteFromClipboard()" title="Wklej ze schowka">
+              <i class="fa-solid fa-paste"></i>
+            </button>
+          </div>
+          <textarea id="formatTextArea" class="styled-input" style="min-height: 150px; resize: vertical;"
+            placeholder="Wklej tutaj swój tekst..."></textarea>
+        </div>
+        <div class="format-options">
+          <div class="format-options-title">
+            <i class="fa-solid fa-cog"></i> Opcje formatowania:
+          </div>
+          <label class="format-option">
+            <input type="checkbox" id="autoHeaders" checked>
+            <span>Automatyczne nagłówki (rozpoznaje instrukcje i procedury)</span>
+          </label>
+          <label class="format-option">
+            <input type="checkbox" id="autoBold" checked>
+            <span>Pogrubianie ważnych elementów (słowa kluczowe, liczby, kwoty)</span>
+          </label>
+          <label class="format-option">
+            <input type="checkbox" id="autoLists" checked>
+            <span>Przekształcanie list (1., a), •, - → lista)</span>
+          </label>
+          <label class="format-option">
+            <input type="checkbox" id="autoSteps" checked>
+            <span>Inteligentne kroki (1. Tytuł - opis → [#1] Tytuł | opis)</span>
+          </label>
+          <label class="format-option">
+            <input type="checkbox" id="autoInfo" checked>
+            <span>Ramki informacyjne (UWAGA:, **ważne** → [INFO])</span>
+          </label>
+        </div>
+      </div>
+      <div class="modal-buttons">
+        <button class="modal-button secondary" onclick="loadTestText()">
+          <i class="fa-solid fa-flask"></i> Test
+        </button>
+        <button class="modal-button secondary" onclick="clearFormatTextArea()">
+          <i class="fa-solid fa-eraser"></i> Wyczyść
+        </button>
+        <button class="modal-button primary" onclick="formatText()">
+          <i class="fa-solid fa-magic-wand-sparkles"></i> Przekształć i wklej
+        </button>
+      </div>
+    </div>
+  </div>
+
+
+  <script src="index.js"></script>
+</body>
+
+</html>
